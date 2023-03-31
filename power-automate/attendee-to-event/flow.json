@@ -1,0 +1,147 @@
+{
+    "id": "6f343823-9c0e-4196-856e-1a6023f9525e",
+    "brandColor": "#8C3900",
+    "connectionReferences": {
+        "shared_office365groups": {
+            "connection": {
+                "id": "/new_sharedoffice365groups_8502d"
+            }
+        }
+    },
+    "connectorDisplayName": "Control",
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KIDxwYXRoIGQ9Im0wIDBoMzJ2MzJoLTMyeiIgZmlsbD0iIzhDMzkwMCIvPg0KIDxwYXRoIGQ9Im04IDEwaDE2djEyaC0xNnptMTUgMTF2LTEwaC0xNHYxMHptLTItOHY2aC0xMHYtNnptLTEgNXYtNGgtOHY0eiIgZmlsbD0iI2ZmZiIvPg0KPC9zdmc+DQo=",
+    "isTrigger": false,
+    "operationName": "Attendee_to_Event",
+    "operationDefinition": {
+        "type": "Scope",
+        "actions": {
+            "Parse_JSON": {
+                "type": "ParseJson",
+                "inputs": {
+                    "content": {
+                        "EventID": "AAMkADljMDU2ZWIxLTQ3NDctNDRjMS05OWE3LTAyOTllNTcyMzE4MgBGAAAAAAD-fRqOyEgwTp7S0wDoRdl4BwDSFUs-dzXJRKukoPwfbnxeAAAAAAENAADSFUs-dzXJRKukoPwfbnxeAAB1D8lIAAA=",
+                        "NewAttendee": "@{triggerBody()['text']}"
+                    },
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "EventID": {
+                                "type": "string"
+                            },
+                            "NewAttendee": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "runAfter": {},
+                "metadata": {
+                    "operationMetadataId": "33162e88-6b9c-4f30-91fe-88c6caf68ffb"
+                }
+            },
+            "Send_an_HTTP_request_-_Attendees": {
+                "type": "OpenApiConnection",
+                "inputs": {
+                    "host": {
+                        "connectionName": "shared_office365groups",
+                        "operationId": "HttpRequest",
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365groups"
+                    },
+                    "parameters": {
+                        "Uri": "https://graph.microsoft.com/v1.0/me/events/@{body('Parse_JSON')?['EventID']}",
+                        "Method": "PATCH",
+                        "Body": "{ \"hideAttendees\": true}",
+                        "ContentType": "application/json"
+                    },
+                    "authentication": {
+                        "type": "Raw",
+                        "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                    }
+                },
+                "runAfter": {
+                    "Parse_JSON": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "operationMetadataId": "ac8f4181-2fc0-459b-9199-815570d60463"
+                }
+            },
+            "Send_an_HTTP_request_-_Event": {
+                "type": "OpenApiConnection",
+                "inputs": {
+                    "host": {
+                        "connectionName": "shared_office365groups",
+                        "operationId": "HttpRequest",
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365groups"
+                    },
+                    "parameters": {
+                        "Uri": "https://graph.microsoft.com/v1.0/me/events/@{body('Parse_JSON')?['EventID']}",
+                        "Method": "GET",
+                        "ContentType": "application/json"
+                    },
+                    "authentication": {
+                        "type": "Raw",
+                        "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                    }
+                },
+                "runAfter": {
+                    "Send_an_HTTP_request_-_Attendees": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "operationMetadataId": "8dc84c1f-d36c-457b-9ced-ae527ae2dbab"
+                }
+            },
+            "New_Attende": {
+                "type": "Compose",
+                "inputs": [
+                    {
+                        "type": "required",
+                        "emailAddress": {
+                            "address": "@{body('Parse_JSON')?['NewAttendee']}"
+                        }
+                    }
+                ],
+                "runAfter": {
+                    "Send_an_HTTP_request_-_Event": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "operationMetadataId": "94a62e33-31dc-464f-a7bd-0b6f9a82e21f"
+                }
+            },
+            "Send_an_HTTP_request_-_Event_2": {
+                "type": "OpenApiConnection",
+                "inputs": {
+                    "host": {
+                        "connectionName": "shared_office365groups",
+                        "operationId": "HttpRequest",
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365groups"
+                    },
+                    "parameters": {
+                        "Uri": "https://graph.microsoft.com/v1.0/me/events/@{body('Parse_JSON')?['EventID']}",
+                        "Method": "PATCH",
+                        "Body": "{\n\"Attendees\": @{union(outputs('Send_an_HTTP_request_-_Event')?['body']?['attendees'],outputs('New_Attende'))}\n}",
+                        "ContentType": "application/json"
+                    },
+                    "authentication": {
+                        "type": "Raw",
+                        "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                    }
+                },
+                "runAfter": {
+                    "New_Attende": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "operationMetadataId": "e61f4025-9e9b-47b7-8087-1a5332061410"
+                }
+            }
+        },
+        "runAfter": {}
+    }
+}
