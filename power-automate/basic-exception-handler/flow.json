@@ -1,0 +1,113 @@
+{
+    "id": "ded96f52-ade5-4236-906a-ad441c371ad9",
+    "brandColor": "#8C3900",
+    "connectionReferences": {
+        "shared_office365": {
+            "connection": {
+                "id": "/new_Outlook365ConnectionReference"
+            }
+        }
+    },
+    "connectorDisplayName": "Control",
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KIDxwYXRoIGQ9Im0wIDBoMzJ2MzJoLTMyeiIgZmlsbD0iIzhDMzkwMCIvPg0KIDxwYXRoIGQ9Im04IDEwaDE2djEyaC0xNnptMTUgMTF2LTEwaC0xNHYxMHptLTItOHY2aC0xMHYtNnptLTEgNXYtNGgtOHY0eiIgZmlsbD0iI2ZmZiIvPg0KPC9zdmc+DQo=",
+    "isTrigger": false,
+    "operationName": "Exception_handler",
+    "operationDefinition": {
+        "type": "Scope",
+        "actions": {
+            "Send_an_email_(V2)_|_Send_mail_to_exception_receiver": {
+                "type": "OpenApiConnection",
+                "inputs": {
+                    "host": {
+                        "connectionName": "shared_office365",
+                        "operationId": "SendEmailV2",
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                    },
+                    "parameters": {
+                        "emailMessage/To": "@outputs('Compose_|_Exception_receiver')",
+                        "emailMessage/Subject": "Error with a flow: @{workflow()['tags']['flowDisplayName']}",
+                        "emailMessage/Body": "<p>Error with the flow. See the table below.<br>\n<br>\n<strong>Technical Name:</strong> @{workflow()['Name']}<br>\n<strong>Display Name:</strong> @{workflow()['tags']['flowDisplayName']}<br>\n<strong>Environment Name: </strong>@{workflow()['tags']['environmentName']}<br>\n<br>\n<strong>Link to flow run: </strong>@{concat('https://make.powerautomate.com/manage/environments/', workflow()?['tags']?['environmentName'], '/flows/', workflow()?['name'], '/runs/', workflow()?['run']['name'])}<br>\n<strong>Link to the flow:</strong> @{concat('https://make.powerautomate.com/manage/environments/', workflow()?['tags']?['environmentName'], '/flows/', workflow()?['name'])}<br>\n<br>\n@{body('Create_HTML_table_|_Create_table_with_errors')}</p>",
+                        "emailMessage/Importance": "Normal"
+                    },
+                    "authentication": {
+                        "type": "Raw",
+                        "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                    }
+                },
+                "runAfter": {
+                    "Create_HTML_table_|_Create_table_with_errors": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "operationMetadataId": "4b1db751-6212-42a0-ac89-77d6a5ac3a3f"
+                }
+            },
+            "Terminate": {
+                "metadata": {
+                    "operationMetadataId": "08fc212b-4ecf-43e6-a829-b6f9d31661aa"
+                },
+                "type": "Terminate",
+                "inputs": {
+                    "runStatus": "Failed"
+                },
+                "runAfter": {
+                    "Send_an_email_(V2)_|_Send_mail_to_exception_receiver": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Compose_|_Exception_receiver": {
+                "type": "Compose",
+                "inputs": "@triggerOutputs()['headers']['x-ms-user-email-encoded']",
+                "runAfter": {}
+            },
+            "Create_HTML_table_|_Create_table_with_errors": {
+                "type": "Table",
+                "inputs": {
+                    "from": "@result('Main')",
+                    "format": "HTML",
+                    "columns": [
+                        {
+                            "header": "name",
+                            "value": "@item()?['name']"
+                        },
+                        {
+                            "header": "code",
+                            "value": "@item()?['code']"
+                        },
+                        {
+                            "header": "status",
+                            "value": "@item()?['status']"
+                        },
+                        {
+                            "header": "code",
+                            "value": "@item()?['error']?['code']"
+                        },
+                        {
+                            "header": "message",
+                            "value": "@item()?['error']?['message']"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Compose_|_Exception_receiver": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "operationMetadataId": "ab172923-2ad3-4b5e-aac4-59086c8a3fb1"
+                }
+            }
+        },
+        "runAfter": {
+            "Main": [
+                "Failed",
+                "TimedOut"
+            ]
+        },
+        "metadata": {
+            "operationMetadataId": "7778dea0-b063-4bf8-b510-0a3a638c2d4d"
+        }
+    }
+}
