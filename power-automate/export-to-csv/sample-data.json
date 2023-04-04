@@ -1,0 +1,53 @@
+[
+    {
+      "id": 1,
+      "name": "Luke Skywalker",
+      "age": 26,
+      "email": "theforceiswithluke@jedi.org",
+      "planet": "Tatooine",
+      "weapon": "Lightsaber",
+      "favorite_food": "Blue Milk",
+      "quote": "I have a bad feeling about this."
+    },
+    {
+      "id": 2,
+      "name": "Princess Leia",
+      "age": 28,
+      "email": "notjustaprettyface@alderaan.gov",
+      "planet": "Alderaan",
+      "weapon": "Blaster",
+      "favorite_food": "Ewok Jerky",
+      "quote": "Aren't you a little short for a stormtrooper?"
+    },
+    {
+      "id": 3,
+      "name": "Han Solo",
+      "age": 35,
+      "email": "solo@falcon.com",
+      "planet": "Corellia",
+      "weapon": "Blaster",
+      "favorite_food": "Wookiee Cookies",
+      "quote": "I know."
+    },
+    {
+      "id": 4,
+      "name": "Chewbacca",
+      "age": 200,
+      "email": "chewie@falcon.com",
+      "planet": "Kashyyyk",
+      "weapon": "Bowcaster",
+      "favorite_food": "Porg Pies",
+      "quote": "*Chewbacca noise*"
+    },
+    {
+      "id": 5,
+      "name": "Darth Vader",
+      "age": 45,
+      "email": "vader@empire.gov",
+      "planet": "Tatooine",
+      "weapon": "Lightsaber",
+      "favorite_food": "Sith Stew",
+      "quote": "I find your lack of faith disturbing."
+    }
+  ]
+  
