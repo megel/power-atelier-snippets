@@ -1,0 +1,81 @@
+{
+    "id": "a276d9d7-e3b1-474d-80db-bbe8405766d9",
+    "brandColor": "#8C3900",
+    "connectionReferences": {
+        "shared_office365": {
+            "connection": {
+                "id": "/ema_Outlook365ConnectionReference"
+            }
+        }
+    },
+    "connectorDisplayName": "Control",
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KIDxwYXRoIGQ9Im0wIDBoMzJ2MzJoLTMyeiIgZmlsbD0iIzhDMzkwMCIvPg0KIDxwYXRoIGQ9Im04IDEwaDE2djEyaC0xNnptMTUgMTF2LTEwaC0xNHYxMHptLTItOHY2aC0xMHYtNnptLTEgNXYtNGgtOHY0eiIgZmlsbD0iI2ZmZiIvPg0KPC9zdmc+DQo=",
+    "isTrigger": false,
+    "operationName": "Main",
+    "operationDefinition": {
+        "type": "Scope",
+        "actions": {
+            "Compose_|_Get_Export_collection_content": {
+                "type": "Compose",
+                "inputs": "@triggerBody()['text']",
+                "runAfter": {},
+                "metadata": {
+                    "operationMetadataId": "76698d7c-cb10-4ca9-954c-2c1ec2ae3f16"
+                }
+            },
+            "Create_CSV_table": {
+                "type": "Table",
+                "inputs": {
+                    "from": "@JSON(outputs('Compose_|_Get_Export_collection_content'))",
+                    "format": "CSV"
+                },
+                "runAfter": {
+                    "Compose_|_Get_Export_collection_content": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "operationMetadataId": "96b876dc-b646-47d1-a31b-f93a9d265ce8"
+                }
+            },
+            "Send_an_email_(V2)": {
+                "type": "OpenApiConnection",
+                "inputs": {
+                    "host": {
+                        "connectionName": "shared_office365_1",
+                        "operationId": "SendEmailV2",
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                    },
+                    "parameters": {
+                        "emailMessage/To": "@triggerOutputs()['headers']['x-ms-user-email']",
+                        "emailMessage/Subject": "Data Export from Power App",
+                        "emailMessage/Body": "<p>Dear [Recipient Name],<br>\n<br>\nI am writing to inform you that the data export you requested from within our Power App has been successfully completed and is attached to this email. Please find the data file named [file name] containing the requested information.<br>\n<br>\nThe data file is in CSV format and includes all the information you requested. If you have any questions or concerns about the data or if you need further assistance, please do not hesitate to reach out to me.<br>\n<br>\nThank you for using our Power App, and I hope the data provided meets your requirements. We appreciate your business and look forward to assisting you in the future.<br>\n<br>\nBest regards,<br>\n[Name]</p>",
+                        "emailMessage/Attachments": [
+                            {
+                                "Name": "@triggerBody()['text_1']",
+                                "ContentBytes": "@concat(uriComponentToString('%EF%BB%BF'), body('Create_CSV_table'))"
+                            }
+                        ],
+                        "emailMessage/Importance": "High"
+                    },
+                    "authentication": {
+                        "type": "Raw",
+                        "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                    }
+                },
+                "runAfter": {
+                    "Create_CSV_table": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "operationMetadataId": "b6df3445-83cc-413f-b33a-e815a70c0f1b"
+                }
+            }
+        },
+        "runAfter": {},
+        "metadata": {
+            "operationMetadataId": "8bbb560d-b6ed-4850-8077-dce8e0f376a7"
+        }
+    }
+}
